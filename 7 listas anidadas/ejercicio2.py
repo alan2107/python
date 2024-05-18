@@ -12,7 +12,7 @@ while True:
     opcion= input("Ingrese una opcion: ")
 
     if opcion == "1":
-        alta_producto(mercaderia)
+        alta_de_producto(mercaderia)
         bandera = True
     elif opcion == "2":
         if bandera == False:

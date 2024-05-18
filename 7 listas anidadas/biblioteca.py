@@ -23,29 +23,27 @@ def toma_de_datos():
 
     return nombre, cantidad
 
-def alta_producto(mercaderia):
-    nombre = []
-    cantidad = []
-    ubicacion = []
-    toma_de_datos()
-    # Verificar si el producto ya existe
-    for producto in mercaderia:
-        if producto[0] == nombre:
-            print("El producto ya existe.")
-        else:
-            #agregar el nuevo producto
-            mercaderia.append([nombre, cantidad, ubicacion])
-            print("Producto agregado con exito")
+def alta_de_producto(mercaderia:list):
+    producto = input("Ingrese el producto a reponer: ")
+    cantidad = int(input("Ingrese la cantidad que quiere agregar: "))
+    for i in range(len(mercaderia)):
+        for j in range(len(mercaderia)):
+            if mercaderia[i][j][0] == producto:
+                mercaderia[i][j][1] += cantidad
     
 
-def baja_producto(mercaderia, nombre):
+def baja_producto(mercaderia:list):
     # Buscar el producto y eliminarlo si existe
-    for producto in mercaderia:
-        if producto[0] == nombre:
-            mercaderia.remove(producto)
-            print("Producto eliminado con éxito.")
-        else:
-            print("El producto no existe.")
+    mercaderia = input("Ingrese que producto fue vendido: ")
+    cantidad = int(input("Ingrese la cantidad vendida: "))
+
+    for i in range(len(mercaderia)):
+        for j in range(len(mercaderia)):
+            if mercaderia[i][j][0] == mercaderia:
+                if mercaderia[i][j][1] > cantidad:
+                    mercaderia[i][j][1] -= cantidad
+                else:
+                    print("No posees la cantidad necesario de mercaderia")
 
 def modificar_producto(mercaderia, nombre, nueva_cantidad, nueva_ubicacion):
     # Buscar el producto y modificarlo si existe
