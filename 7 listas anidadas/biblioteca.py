@@ -72,3 +72,7 @@ def ordenar_por_nombre(mercaderia):
     print("Listado de productos ordenados por nombre:")
     for producto in mercaderia:
         print(f"Nombre: {producto[0]}, Cantidad: {producto[1]}, Ubicacion: {producto[2]}")
+#-------------------------------------------------------------------------------------------------------------------
+
+
+
