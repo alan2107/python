@@ -168,10 +168,10 @@ def ordenar_por_nombre(lista_personaje:list):
     lista todos los personajes ordenados por nombre de manera ascendente.
     
     argumentos:
-     lista_personajes (list): lista de diccionarios que representan los personajes
+    lista_personajes (list): lista de diccionarios que representan los personajes
 
-     regresa:
-     list : lista de personajes ordenada por nombre
+    regresa:
+    list : lista de personajes ordenada por nombre
 
     '''
     
@@ -212,7 +212,7 @@ def listar_por_color_pelo(lista_personajes:list):
     for superheroe in lista_personajes:
         color_pelo = superheroe['color_pelo']
         if color_pelo not in superheroe_por_color_pelo:
-             superheroe_por_color_pelo[color_pelo] = []
+            superheroe_por_color_pelo[color_pelo] = []
         superheroe_por_color_pelo[color_pelo].append(superheroe)
     return superheroe_por_color_pelo
         

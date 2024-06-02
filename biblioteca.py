@@ -208,7 +208,7 @@ def listar_por_color_pelo(lista_personajes:list):
     for superheroe in lista_personajes:
         color_pelo = superheroe['color_pelo']
         if color_pelo not in superheroe_por_color_pelo:
-             superheroe_por_color_pelo[color_pelo] = []
+            superheroe_por_color_pelo[color_pelo] = []
         superheroe_por_color_pelo[color_pelo].append(superheroe)
     return superheroe_por_color_pelo
         
