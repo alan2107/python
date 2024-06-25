@@ -55,6 +55,8 @@ while True:
         for personaje in resultado:
             print(personaje)
     elif opcion == 'H':
+        resutlado = mostrar_columnas(personajes)
         break
     else:
         print("Opción no válida, intente nuevamente.")
+

@@ -13,5 +13,6 @@ print(factorial(3))
 """ def a():
     lista = [1,6,3,7,4]
     for i in range(len(lista)):
-        if(lista[i] > 50 ): return True
-        else: return True """
+        if(lista[i] > 3):
+            if(lista[i] > 50 ): return True
+            else: return True """

@@ -17,8 +17,6 @@ def mostrar_todos(mercaderia, pos):
         mostrar_uno(i)
     print("\n")
 
-
-
 def toma_de_datos():
     nombre = input("Ingrese el nombre del producto: ")
     cantidad = int(input("Ingrese la cantidad del producto: "))
@@ -262,3 +260,24 @@ def limpiar_pantalla():
     import os
     os.system('cls' if os.name == 'nt' else 'clear') 
 #print("{:<40} {:<40} {:<20} {:<15}".format(col1, col2, col3, col4))
+
+def mostrar_columnas(lista_dicts, nombre=True, identidad=True, empresa=True, altura=True, peso=True, 
+                    genero=True, color_ojos=True, color_pelo=True, fuerza=True, inteligencia=True, imc=True):
+#validaciones
+    msj = "" 
+    for dict in lista_dicts:
+        if(nombre): msj =+ dict["nombre"] + " || "
+        if(identidad): msj =+ dict["identidad"] + " || "
+        if(empresa): msj =+ dict["empresa"] + " || "
+        if(altura): msj =+ dict["altura"] + " || "
+        if(peso): msj =+ dict["peso"] + " || "
+        if(genero): msj =+ dict["genero"] + " || "
+        if(color_ojos): msj =+ dict["color_ojos"] + " || "
+        if(color_pelo): msj =+ dict["color_pelo"] + " || "
+        if(fuerza): msj =+ dict["fuerza"] + " || "
+        if(inteligencia): msj =+ dict["inteligencia"] + " || "
+        if(imc): msj =+ dict["imc"] + " || "
+        msj += "\n-----------------------------------\n" #podrian usar otra funcion con metodo string para generarlo
+    return msj
+
+
