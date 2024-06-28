@@ -1,8 +1,11 @@
 import pygame
 import json
 import os
-from datos import lista  
-from constantes import *  
+from datos import lista
+from constantes import *
+from puntajes import *
+from preguntas import *
+from movimientos import *
 
 # Inicializar pygame
 pygame.init()
@@ -28,6 +31,8 @@ casilla_actual = 0
 juego_comenzado = False
 mostrar_puntuaciones = False
 pregunta_actual = lista[indice_pregunta_actual]
+mostrar_mensaje_ganador = False
+mostrar_mensaje_perdedor = False
 
 # Puntuaciones hardcodeadas
 puntuaciones_hardcodeadas = [
@@ -39,11 +44,7 @@ puntuaciones_hardcodeadas = [
 ]
 
 # Leer puntuaciones guardadas
-if os.path.exists("puntajes.json"):
-    with open("puntajes.json", "r") as archivo:
-        puntuaciones_guardadas = [json.loads(linea) for linea in archivo]
-else:
-    puntuaciones_guardadas = []
+puntuaciones_guardadas = leer_puntuaciones()
 
 # Fuentes
 fuente = pygame.font.SysFont("Arial", 24)
@@ -75,7 +76,13 @@ texto_casillas = [
 ]
 
 # Rectángulo del participante (inicialmente antes de la primera casilla)
-rect_participante = pygame.Rect(40, 250, 80, 100)
+rect_participante = pygame.Rect(40, 250, 50, 80)
+
+# Crear rectángulos para las casillas
+rect_casillas = [pygame.Rect(x, y, 60, 60) for x, y in casillas]
+
+# Rectángulo de la casilla de llegada
+rect_llegada = pygame.Rect(680, 370, 60, 60)  # Ajustar según sea necesario
 
 while corriendo:
     for evento in pygame.event.get():
@@ -93,51 +100,37 @@ while corriendo:
                 if 408 <= mouse_pos[0] <= 558 and 478 <= mouse_pos[1] <= 558:  # Botón Terminar
                     nombre = input("Ingresa tu nombre: ")
                     datos_jugador = {"nombre": nombre, "puntaje": puntaje}
-                    with open("puntajes.json", "a") as archivo:
-                        json.dump(datos_jugador, archivo)
-                        archivo.write("\n")
+                    guardar_puntuacion(datos_jugador)
                     puntuaciones_guardadas.append(datos_jugador)
                     mostrar_puntuaciones = True  # Mostrar la pantalla de puntuaciones al terminar
                 if juego_comenzado:
                     for i, (x, y) in enumerate(posiciones_opciones):
                         if x <= mouse_pos[0] <= x + 150 and y <= mouse_pos[1] <= y + 50:
-                            if ['a', 'b', 'c'][i] == pregunta_actual['correcta']:
+                            respuesta_correcta = verificar_respuesta(pregunta_actual, ['a', 'b', 'c'][i])
+                            if respuesta_correcta:
                                 puntaje += 10
-                                if casilla_actual < len(casillas) - 1:  # Solo avanzar si no está en la última casilla
-                                    casilla_actual += 2  # Avanza 2
-                                if casilla_actual >= len(casillas):  # Si llega al final del tablero
-                                    casilla_actual = len(casillas)
+                                
+                                if casilla_actual < len(rect_casillas) - 1:  # Solo avanzar si no está en la última casilla
+                                    casilla_actual += 2  # Avanza 2 casillas
+                                if casilla_actual >= len(rect_casillas):  # Si llega al final del tablero
+                                    casilla_actual = len(rect_casillas) - 1
                             else:
                                 casilla_actual -= 1
                                 if casilla_actual < 0:
                                     casilla_actual = 0
-                            rect_participante.x, rect_participante.y = casillas[casilla_actual]
+                            rect_participante.topleft = rect_casillas[casilla_actual].topleft
                             indice_pregunta_actual += 1
                             if indice_pregunta_actual < len(lista):
                                 pregunta_actual = lista[indice_pregunta_actual]
                             tiempo = 5
+                
                 if 640 <= mouse_pos[0] <= 790 and 10 <= mouse_pos[1] <= 60:  # Botón para mostrar puntuaciones
                     mostrar_puntuaciones = True
 
     if mostrar_puntuaciones:
-        pantalla.fill(AZUL)
-        titulo = fuente.render("Puntuaciones", True, BLANCO)
-        pantalla.blit(titulo, (ANCHO // 2 - titulo.get_width() // 2, 20))
-
-        puntuaciones_totales = puntuaciones_hardcodeadas + puntuaciones_guardadas
-        puntuaciones_totales = sorted(puntuaciones_totales, key=lambda x: x['puntaje'], reverse=True)[:10]
-
-        for i, puntuacion in enumerate(puntuaciones_totales):
-            texto_puntuacion = fuente.render(f"{puntuacion['nombre']}: {puntuacion['puntaje']}", True, BLANCO)
-            pantalla.blit(texto_puntuacion, (ANCHO // 2 - texto_puntuacion.get_width() // 2, 80 + i * 40))
-
-        texto_volver = fuente.render("Salir", True, NEGRO)
-        pygame.draw.rect(pantalla, CELESTE, (ANCHO // 2 - 75, ALTO - 100, 150, 50))
-        pantalla.blit(texto_volver, (ANCHO // 2 - texto_volver.get_width() // 2, ALTO - 90))
+        mostrar_puntuaciones(pantalla, fuente, puntuaciones_hardcodeadas, puntuaciones_guardadas, ANCHO, ALTO)
     else:
         pantalla.fill(AZUL)
-        pantalla.blit(imagen_principal, (5, 10))
-        pantalla.blit(imagen_llegada, (20, 350))  # Posición del logo al final del tablero
 
         # Dibujar casillas
         for i, (x, y) in enumerate(casillas):
@@ -146,8 +139,14 @@ while corriendo:
                 texto_especial = fuente_pequena.render(texto_casillas[i], True, BLANCO)
                 pantalla.blit(texto_especial, (x + 5, y + 20))
 
-        # Dibujar el participante
+        # Dibuja el participante
         pantalla.blit(imagen_participante, (rect_participante.x, rect_participante.y))
+
+        # Dibujar imagen principal arriba de la casilla
+        pantalla.blit(imagen_principal, (5, 10))
+
+        # Dibujar la casilla de llegada
+        pantalla.blit(imagen_llegada, (660, 370))
 
         # Dibuja botones de comenzar y terminar
         pygame.draw.rect(pantalla, CELESTE, (408, 478, 150, 80))
@@ -186,7 +185,41 @@ while corriendo:
             casilla_actual -= 1  # Retroceder una casilla si no se responde a tiempo
             if casilla_actual < 0:
                 casilla_actual = 0
-            rect_participante.x, rect_participante.y = casillas[casilla_actual]
+            rect_participante.topleft = rect_casillas[casilla_actual].topleft
+
+    # Comprobar colisiones con casillas especiales
+    mover_participante(casilla_actual, texto_casillas, rect_casillas, rect_participante)
+
+    # Comprobar si el participante ha llegado a la casilla de llegada
+    if rect_participante.colliderect(rect_llegada) and indice_pregunta_actual < len(lista):
+        mostrar_mensaje_ganador = True
+
+    # Mostrar mensaje "Has ganado"
+    if mostrar_mensaje_ganador:
+        pantalla.fill(AZUL)
+        mensaje_ganador = fuente.render("¡Has ganado!", True, BLANCO)
+        pantalla.blit(mensaje_ganador, (ANCHO // 2 - mensaje_ganador.get_width() // 2, ALTO // 2 - mensaje_ganador.get_height() // 2))
+        pygame.display.flip()
+        nombre = input("Ingresa tu nombre: ")
+        datos_jugador = {"nombre": nombre, "puntaje": puntaje}
+        guardar_puntuacion(datos_jugador)
+        puntuaciones_guardadas.append(datos_jugador)
+        pygame.time.delay(3000)  # Espera 3 segundos
+        mostrar_mensaje_ganador = False
+        corriendo = False
+
+    # Mostrar mensaje "Has perdido"
+    if indice_pregunta_actual >= len(lista) and not rect_participante.colliderect(rect_llegada):
+        mostrar_mensaje_perdedor = True
+
+    if mostrar_mensaje_perdedor:
+        pantalla.fill(AZUL)
+        mensaje_perdedor = fuente.render("¡Has perdido!", True, BLANCO)
+        pantalla.blit(mensaje_perdedor, (ANCHO // 2 - mensaje_perdedor.get_width() // 2, ALTO // 2 - mensaje_perdedor.get_height() // 2))
+        pygame.display.flip()
+        pygame.time.delay(3000)  # Espera 3 segundos
+        mostrar_mensaje_perdedor = False
+        corriendo = False
 
     pygame.display.flip()
     reloj.tick(60)
